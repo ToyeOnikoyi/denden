@@ -1,15 +1,15 @@
-import ws  from './socket';
+//import ws  from './components';
 import density from './api'
-import { MESSAGE_SENT, MESSAGE_RECEIVED, GET_SPACES } from './types';
+import { MESSAGE_SENT, MESSAGE_RECEIVED, GET_SPACES,GET_SOCKET } from './types';
 
 // Send message
-export const sendMsg = data => {
-    return dispatch => {
-        console.log("actions send message");
-        dispatch(sentMsg(data));
-        ws.send(data);
-    }
-}
+// export const sendMsg = data => {
+//     return dispatch => {
+//         console.log("actions send message");
+//         dispatch(sentMsg(data));
+//         ws.send(data);
+//     }
+// }
 
 export const recieveMsg = data => {
     return dispatch => {
@@ -34,37 +34,26 @@ export const getSpaces =   data => {
             })
             
             console.log('actions::getSpaces: 4')
-            //console.log('actions::getSpaces: ',JSON.stringify(response.data)) 
 
     }
 }
 
-// export const getCounts =   data => {
-    
-//     return   dispatch => {
-//             density.get('/spaces',{
-//                 params: {
-//                     limit: 20
-//                 }
-//             })
-//             .then(resp => {
-//                 resp.data.results.map()
-//                 density.get(`/${resp.data}/counts`)
-//                 dispatch(gotSpaces(resp.data))
-//             })
-            
-           
-//             //console.log('actions::getSpaces: ',JSON.stringify(response.data)) 
+export const getSocket =   data => {
 
-//     }
-// }
+    return   dispatch => {
+        
+            density.post('/sockets')
+            .then(resp => {
+                console.log('getSocket: ',resp.data)
+                dispatch(gotSocket(resp.data))
+            })
+            .catch((err) => {
+                console.log('getSocket error: ',err)
+            })
 
-const sentMsg = data => {
-    return {
-        type: MESSAGE_SENT,
-        payload: data
     }
-}
+} 
+
 
 const receivedMsg = data => {
     return {
@@ -76,6 +65,13 @@ const receivedMsg = data => {
 const gotSpaces = data => {
     return {
         type: GET_SPACES,
+        payload: data
+    }
+}
+
+const gotSocket = data => {
+    return {
+        type: GET_SOCKET,
         payload: data
     }
 }

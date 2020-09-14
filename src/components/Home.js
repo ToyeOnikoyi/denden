@@ -8,64 +8,62 @@ import {
     FlatList,
     RefreshControl
 } from 'react-native';
-import ws, { WS_URL } from '../socket';
-import { sendMsg, recieveMsg,getSpaces } from '../actions';
+// import ws, { WS_URL } from '../socket';
+import { WS_URL,ws } from './MyWebSocket';
+import { sendMsg, recieveMsg,getSpaces,getSocket } from '../actions';
 import { connect } from 'react-redux';
 import SpacesList from './SpacesList'
 
 const Home = (props) => {
 
-    // state = {
-    //     //input: '',
-    //     refreshing: false,
-    // }
     const [refreshing,setRefreshing] = useState(false)
+    const [connected,setConnected] = useState(false)
 
 
     const key = [{name:1},{name:2},{name:3},]
-
-    // constructor(props) {
-    //     super(props);
-    //     console.log("Home", props);
-    // }
 
     const _sendMsg = (msg) =>  {
         props.sendMsg(JSON.stringify(msg));
     }
 
-    // _changeText(text) {
-    //     this.setState({ input: text });
-    // }
-
-    // componentDidMount() {
-    //     // Component specific event listeners
-    //     this.props.getSpaces()
-
-    //     ws.addEventListener('open', event => {
-    //         console.log("ws message received", event.data);
-    //         this.props.recieveMsg(event.data);
-    //     });
-
-    //     ws.addEventListener('message', event => {
-    //         console.log("ws message received", event.data);
-    //         this.props.recieveMsg(event.data);
-    //     });
-    // }
 
     useEffect(() =>{
-        // get spaces
-        props.getSpaces()
+        // get socket
+        props.getSocket()
+        if(props.socket.socket.url == null) console.log('no socket url')
+        else
+        {
+            const WS_URL = props.socket.socket.url;
+            const ws = new WebSocket(WS_URL);
 
-        ws.addEventListener('open', event => {
-            console.log("ws message received", event.data);
-            props.recieveMsg(event.data);
-        });
+            ws.onerror = (e) => {
+                console.log("ws error", e);
+            }
 
-        ws.addEventListener('message', event => {
-            console.log("ws message received", event.data);
-            props.recieveMsg(event.data);
-        });
-    },[])
+            ws.onopen = (e) => {
+                console.log("ws open", e);
+            }
+
+            ws.onclose = (e) => {
+                console.log("ws close", e);
+            }
+            // get spaces
+            props.getSpaces()
+
+            ws.addEventListener('open', event => {
+                console.log("ws message received", event.data);
+                setConnected(true)
+                props.recieveMsg(event.data);
+            });
+
+            ws.addEventListener('message', event => {
+                console.log("ws message received", event.data);
+                props.recieveMsg(event.data);
+            });
+
+            ws.close();
+        }
+    },[props.socket.socket.ttl])
 
     const _onRefresh = () => {
         setRefreshing(true)
@@ -92,6 +90,7 @@ const Home = (props) => {
                     <RefreshControl refreshing={refreshing} onRefresh={_onRefresh} />
                   }
                 />
+                {/* <Text style={styles.header}>{props.socket.socket.url}</Text> */}
 
             </View>
         );
@@ -115,6 +114,9 @@ const mapDispatchToProps = dispatch => {
         },
         getSpaces: data => {
             dispatch(getSpaces(data))
+        },
+        getSocket: data => {
+            dispatch(getSocket(data))
         }
     }
 }
@@ -127,18 +129,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#512DA8',
-    },
-    button: {
-        fontSize: 20,
-        borderRadius: 50,
-        color: 'white',
-        fontWeight: '800'
-    },
-    buttonContainer: {
-        backgroundColor: '#8BC34A',
-        borderRadius: 8,
-        padding: 16,
-        marginTop: 16
     },
     received: {
         marginTop: 40,
@@ -157,15 +147,4 @@ const styles = StyleSheet.create({
         marginRight: 20,
         fontWeight: '800'
     },
-    editText: {
-        height: 40,
-        backgroundColor: '#f5f5f5',
-        color: 'black',
-        fontSize: 18,
-        alignSelf: 'stretch',
-        marginLeft: 20,
-        marginRight: 20,
-        borderRadius: 8,
-        height: 60,
-    }
 });

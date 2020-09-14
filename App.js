@@ -30,14 +30,13 @@ import { Provider } from 'react-redux';
 import {Text,View,StyleSheet} from 'react-native';
 import store from './src/store';
 import Home from './src/components/Home';
-import MyWebSocket from './src/components/MyWebSocket';
+//import MyWebSocket from './src/components/MyWebSocket';
 
 export default class App extends Component {
     render() {
         return (
             <Provider store={store}>
                 <Home />
-                <MyWebSocket />
             </Provider>
         );
     }

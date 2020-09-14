@@ -10,6 +10,7 @@ const SpacesList = (props) => {
             <TouchableOpacity style={styles.viewStyle}>
                 <Text style={styles.textStyle}>{props.spaces.name}</Text>
                 <Text style={styles.textCountStyle}> {props.spaces.current_count}</Text>
+                
             </TouchableOpacity>
         </ScrollView>
     )
